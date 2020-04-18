@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
@@ -184,5 +185,13 @@ public class Player : MonoBehaviour
         m_animator.SetBool(AnimatorParameters.IsThrowing, m_isThrowing);
         m_animator.SetFloat(AnimatorParameters.InputX, m_input.x);
         m_animator.SetFloat(AnimatorParameters.VelocityY, m_rigidBody.velocity.y);
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        Pickup pickup = other.GetComponent<Pickup>();
+        if (pickup != null) {
+            Debug.Log(pickup.type);
+        }
     }
 }
