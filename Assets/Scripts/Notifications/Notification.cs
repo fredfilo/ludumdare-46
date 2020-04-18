@@ -5,7 +5,10 @@
 
     public enum Type
     {
-        READ_MESSAGE
+        READ_MESSAGES,
+        UI_INTERACTION_STARTED,
+        UI_INTERACTION_ENDED,
+        PLAYER_WANTS_TO_INTERACT
     }
     
     // PROPERTIES

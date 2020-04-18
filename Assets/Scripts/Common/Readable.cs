@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,6 +14,6 @@ public class Readable : MonoBehaviour, Interactable
 
     public void Interact(Player player)
     {
-        throw new System.NotImplementedException();
+        GameController.instance.notifier.Notify(new ReadMessages("Note:", m_messages));
     }
 }

@@ -1,9 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, Notifiable
 {
     private const float MIN_INPUT_FOR_RUN = 0.25f;
     
@@ -36,6 +37,7 @@ public class Player : MonoBehaviour
     private bool m_isJumping;
     private bool m_jumpHold;
 
+    private bool m_isControllable = true;
     private bool m_isDrowning;
     private bool m_isThrowing;
     
@@ -69,12 +71,20 @@ public class Player : MonoBehaviour
     
     public void OnInputMove(InputAction.CallbackContext context)
     {
+        if (!m_isControllable) {
+            return;
+        }
+        
         m_input.x = context.ReadValue<Vector2>().x;
         m_inputAbsolute.x = Mathf.Abs(m_input.x);
     }
     
     public void OnInputJump(InputAction.CallbackContext context)
     {
+        if (!m_isControllable) {
+            return;
+        }
+        
         switch (context.phase) {
             case InputActionPhase.Started:
                 m_jumpHold = true;
@@ -90,6 +100,10 @@ public class Player : MonoBehaviour
     
     public void OnInputUseEquipped(InputAction.CallbackContext context)
     {
+        if (!m_isControllable) {
+            return;
+        }
+        
         if (context.phase == InputActionPhase.Performed) {
             m_isThrowing = true;
         }
@@ -97,9 +111,30 @@ public class Player : MonoBehaviour
     
     public void OnInputInteract(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Canceled && m_interactables.Count > 0) {
+        if (context.phase != InputActionPhase.Canceled) {
+            return;
+        }
+        
+        if (!m_isControllable) {
+            GameController.instance.notifier.Notify(new PlayerWantsToInteract());
+            return;
+        }
+        
+        if (m_interactables.Count > 0) {
             Interactable interactable = m_interactables[0];
             interactable.Interact(this);
+        }
+    }
+    
+    public void OnNotification(Notification notification, Notifier notifier)
+    {
+        switch (notification.type) {
+            case Notification.Type.UI_INTERACTION_STARTED:
+                m_isControllable = false;
+                break;
+            case Notification.Type.UI_INTERACTION_ENDED:
+                m_isControllable = true;
+                break;
         }
     }
 
@@ -110,6 +145,15 @@ public class Player : MonoBehaviour
     {
         m_rigidBody = GetComponent<Rigidbody2D>();
         m_animator = GetComponent<Animator>();
+        
+        GameController.instance.notifier.Subscribe(Notification.Type.UI_INTERACTION_STARTED, this);
+        GameController.instance.notifier.Subscribe(Notification.Type.UI_INTERACTION_ENDED, this);
+    }
+
+    private void OnDestroy()
+    {
+        GameController.instance.notifier.Unsubscribe(Notification.Type.UI_INTERACTION_STARTED, this);
+        GameController.instance.notifier.Unsubscribe(Notification.Type.UI_INTERACTION_ENDED, this);
     }
 
     private void Update()
@@ -178,6 +222,10 @@ public class Player : MonoBehaviour
         // Reset
         m_velocity.x = 0;
 
+        if (!m_isControllable) {
+            return;
+        }
+        
         // Movement
         if (!m_isThrowing && m_inputAbsolute.x >= MIN_INPUT_FOR_RUN && !m_isDrowning) {
             m_velocity.x = m_input.x * m_movementSpeed;
@@ -220,6 +268,4 @@ public class Player : MonoBehaviour
             m_interactables.Remove(interactable);
         }
     }
-
-
 }
