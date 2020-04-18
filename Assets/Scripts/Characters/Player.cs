@@ -24,6 +24,7 @@ public class Player : MonoBehaviour
     private readonly Vector2 m_checkGroundDirection = Vector2.down;
     private bool m_isGrounded;
     private float m_wasGroundedAt;
+    private Vector3 m_wasGroundedAtPosition;
 
     [SerializeField] private float m_jumpForce = 3f;
     [SerializeField] private int m_jumpMaxIterations = 4;
@@ -33,9 +34,22 @@ public class Player : MonoBehaviour
     private bool m_isJumping;
     private bool m_jumpHold;
 
+    private bool m_isDrowning;
+
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
+    public void OnCannotWalk()
+    {
+        m_isDrowning = true;
+    }
+
+    public void OnDrownFinished()
+    {
+        m_isDrowning = false;
+        transform.position = m_wasGroundedAtPosition;
+    }
+    
     public void OnInputMove(InputAction.CallbackContext context)
     {
         m_input.x = context.ReadValue<Vector2>().x;
@@ -114,6 +128,7 @@ public class Player : MonoBehaviour
         if (hit.collider) {
             m_isGrounded = true;
             m_wasGroundedAt = Time.time;
+            m_wasGroundedAtPosition = transform.position;
             return;
         }
 
@@ -122,6 +137,7 @@ public class Player : MonoBehaviour
         if (hit.collider) {
             m_isGrounded = true;
             m_wasGroundedAt = Time.time;
+            m_wasGroundedAtPosition = transform.position;
         }
     }
 
@@ -131,7 +147,7 @@ public class Player : MonoBehaviour
         m_velocity.x = 0;
 
         // Movement
-        if (m_inputAbsolute.x >= MIN_INPUT_FOR_RUN) {
+        if (m_inputAbsolute.x >= MIN_INPUT_FOR_RUN && !m_isDrowning) {
             m_velocity.x = m_input.x * m_movementSpeed;
         }
 
@@ -151,6 +167,7 @@ public class Player : MonoBehaviour
     {
         m_animator.SetBool(AnimatorParameters.IsGrounded, m_isGrounded);
         m_animator.SetBool(AnimatorParameters.IsRunning, m_inputAbsolute.x >= MIN_INPUT_FOR_RUN);
+        m_animator.SetBool(AnimatorParameters.IsDrowning, m_isDrowning);
         m_animator.SetFloat(AnimatorParameters.InputX, m_input.x);
         m_animator.SetFloat(AnimatorParameters.VelocityY, m_rigidBody.velocity.y);
     }
