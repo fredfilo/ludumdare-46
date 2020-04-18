@@ -12027,6 +12027,21 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 034e25e5-8eb8-49d6-a543-d3b509a436d4
     m_ActionName: Player/UseEquiped[/DualShock4GamepadHID/buttonWest,/Mouse/rightButton,/Keyboard/e]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1699985466}
+        m_MethodName: OnInputInteract
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e1077009-ea01-49b4-ae19-883cba09461d
+    m_ActionName: Player/Interact[/DualShock4GamepadHID/buttonEast,/Keyboard/r]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -12193,7 +12208,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f8d025ffba3f4ee6b98df6b7fb1754d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_proximityText: {fileID: 1309490096}
+  m_type: 0
+  m_proximityText: {fileID: 0}
 --- !u!1 &1904378550
 GameObject:
   m_ObjectHideFlags: 0

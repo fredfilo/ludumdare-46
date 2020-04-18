@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class Pickup : MonoBehaviour
+public class Pickup : MonoBehaviour, Interactable
 {
     // STATIC
     // -------------------------------------------------------------------------
@@ -20,6 +20,18 @@ public class Pickup : MonoBehaviour
     // -------------------------------------------------------------------------
 
     public Type type => m_type;
+    
+    // PUBLIC METHODS
+    // -------------------------------------------------------------------------
+    
+    public void Interact(Player player)
+    {
+        if (!player.Pickup(m_type)) {
+            return;
+        }
+        
+        Destroy(transform.parent.gameObject);
+    }
     
     // PRIVATE METHODS
     // -------------------------------------------------------------------------

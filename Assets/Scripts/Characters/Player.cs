@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -37,10 +38,19 @@ public class Player : MonoBehaviour
 
     private bool m_isDrowning;
     private bool m_isThrowing;
-
+    
+    private readonly List<Interactable> m_interactables = new List<Interactable>();
+    
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
+    public bool Pickup(Pickup.Type pickupType)
+    {
+        Debug.Log("PickedUp: " + pickupType);
+
+        return true;
+    }
+    
     public void OnCannotWalk()
     {
         m_isDrowning = true;
@@ -82,6 +92,14 @@ public class Player : MonoBehaviour
     {
         if (context.phase == InputActionPhase.Performed) {
             m_isThrowing = true;
+        }
+    }
+    
+    public void OnInputInteract(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Canceled && m_interactables.Count > 0) {
+            Interactable interactable = m_interactables[0];
+            interactable.Interact(this);
         }
     }
 
@@ -189,9 +207,19 @@ public class Player : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Pickup pickup = other.GetComponent<Pickup>();
-        if (pickup != null) {
-            Debug.Log(pickup.type);
+        Interactable interactable = other.GetComponent<Interactable>();
+        if (interactable != null && !m_interactables.Contains(interactable)) {
+            m_interactables.Insert(0, interactable);
         }
     }
+    
+    private void OnTriggerExit2D(Collider2D other)
+    {
+        Interactable interactable = other.GetComponent<Interactable>();
+        if (interactable != null && m_interactables.Contains(interactable)) {
+            m_interactables.Remove(interactable);
+        }
+    }
+
+
 }
