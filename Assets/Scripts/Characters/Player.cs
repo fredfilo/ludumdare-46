@@ -35,6 +35,7 @@ public class Player : MonoBehaviour
     private bool m_jumpHold;
 
     private bool m_isDrowning;
+    private bool m_isThrowing;
 
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
@@ -48,6 +49,11 @@ public class Player : MonoBehaviour
     {
         m_isDrowning = false;
         transform.position = m_wasGroundedAtPosition;
+    }
+    
+    public void OnThrowFinished()
+    {
+        m_isThrowing = false;
     }
     
     public void OnInputMove(InputAction.CallbackContext context)
@@ -71,6 +77,13 @@ public class Player : MonoBehaviour
         }
     }
     
+    public void OnInputUseEquipped(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed) {
+            m_isThrowing = true;
+        }
+    }
+
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
     
@@ -147,7 +160,7 @@ public class Player : MonoBehaviour
         m_velocity.x = 0;
 
         // Movement
-        if (m_inputAbsolute.x >= MIN_INPUT_FOR_RUN && !m_isDrowning) {
+        if (!m_isThrowing && m_inputAbsolute.x >= MIN_INPUT_FOR_RUN && !m_isDrowning) {
             m_velocity.x = m_input.x * m_movementSpeed;
         }
 
@@ -168,6 +181,7 @@ public class Player : MonoBehaviour
         m_animator.SetBool(AnimatorParameters.IsGrounded, m_isGrounded);
         m_animator.SetBool(AnimatorParameters.IsRunning, m_inputAbsolute.x >= MIN_INPUT_FOR_RUN);
         m_animator.SetBool(AnimatorParameters.IsDrowning, m_isDrowning);
+        m_animator.SetBool(AnimatorParameters.IsThrowing, m_isThrowing);
         m_animator.SetFloat(AnimatorParameters.InputX, m_input.x);
         m_animator.SetFloat(AnimatorParameters.VelocityY, m_rigidBody.velocity.y);
     }
