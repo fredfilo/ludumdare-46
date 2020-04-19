@@ -18,9 +18,9 @@ TagManager:
   - Player
   - Pickup
   - InteractableArea
-  - 
-  - 
-  - 
+  - HitArea
+  - PlayerWeapon
+  - Trees
   - 
   - 
   - 
@@ -39,6 +39,18 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Tree
+    uniqueID: 1578461999
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Player
+    uniqueID: 1572898147
+    locked: 0
+  - name: Grass
+    uniqueID: 454461425
+    locked: 0
+  - name: Water
+    uniqueID: 3445782431
     locked: 0

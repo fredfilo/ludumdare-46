@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -41,6 +39,8 @@ public class Player : MonoBehaviour, Notifiable
     private bool m_isDrowning;
     private bool m_isThrowing;
     
+    [SerializeField] private PlayerWeapon m_weapon;
+    
     private readonly List<Interactable> m_interactables = new List<Interactable>();
     
     // PUBLIC METHODS
@@ -67,6 +67,11 @@ public class Player : MonoBehaviour, Notifiable
     public void OnThrowFinished()
     {
         m_isThrowing = false;
+    }
+
+    public void OnThrowAttack()
+    {
+        m_weapon.Attack();
     }
     
     public void OnInputMove(InputAction.CallbackContext context)
@@ -266,6 +271,7 @@ public class Player : MonoBehaviour, Notifiable
         Interactable interactable = other.GetComponent<Interactable>();
         if (interactable != null && m_interactables.Contains(interactable)) {
             m_interactables.Remove(interactable);
+            Debug.Log("Added damageable");
         }
     }
 }

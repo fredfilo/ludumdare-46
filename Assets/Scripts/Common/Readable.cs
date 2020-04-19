@@ -7,13 +7,14 @@ public class Readable : MonoBehaviour, Interactable
     // PROPERTIES
     // -------------------------------------------------------------------------
     
-    [SerializeField] private List<String> m_messages = new List<string>();
+    [SerializeField] private Messages.Type m_messagesType;
     
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
     public void Interact(Player player)
     {
-        GameController.instance.notifier.Notify(new ReadMessages("Note:", m_messages));
+        List<String> messages = GameController.instance.messages.GetMessages(m_messagesType);
+        GameController.instance.notifier.Notify(new ReadMessages("Note:", messages));
     }
 }

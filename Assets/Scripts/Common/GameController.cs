@@ -11,6 +11,7 @@ public class GameController : MonoBehaviour
     // -------------------------------------------------------------------------
     
     private readonly Notifier m_notifier = new Notifier();
+    private readonly Messages m_messages = new Messages();
     
     // ACCESSORS
     // -------------------------------------------------------------------------
@@ -18,6 +19,8 @@ public class GameController : MonoBehaviour
     public static GameController instance => s_instance;
 
     public Notifier notifier => m_notifier;
+
+    public Messages messages => m_messages;
     
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
