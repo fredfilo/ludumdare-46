@@ -40,15 +40,37 @@ public class Player : MonoBehaviour, Notifiable
     private bool m_isThrowing;
     
     [SerializeField] private PlayerWeapon m_weapon;
+    [SerializeField] private Vector3 m_throwForce = new Vector3(300f, 300f, 0);
     
     private readonly List<Interactable> m_interactables = new List<Interactable>();
+
+    private GameObject m_pickedUp;
+    private Types.PickupType _mPickedUpPickupType = Types.PickupType.NONE;
     
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
-    public bool Pickup(Pickup.Type pickupType)
+    public bool Pickup(Types.PickupType pickupPickupType, GameObject pickupObject)
     {
-        Debug.Log("PickedUp: " + pickupType);
+        if (m_pickedUp != null) {
+            return false;
+        }
+
+        _mPickedUpPickupType = pickupPickupType;
+        
+        switch (pickupPickupType) {
+            case Types.PickupType.WOOD:
+                m_pickedUp = pickupObject;
+                m_pickedUp.transform.parent = transform;
+                m_pickedUp.transform.localPosition = new Vector3(0, 1f, 0);
+                m_pickedUp.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                m_pickedUp.GetComponent<Collider2D>().enabled = false;
+                break;
+            case Types.PickupType.AXE:
+                m_pickedUp = pickupObject;
+                m_pickedUp.SetActive(false);
+                break;
+        }
 
         return true;
     }
@@ -71,7 +93,19 @@ public class Player : MonoBehaviour, Notifiable
 
     public void OnThrowAttack()
     {
-        m_weapon.Attack();
+        if (m_pickedUp == null || _mPickedUpPickupType == Types.PickupType.AXE) {
+            m_weapon.Attack();
+            return;
+        }
+        
+        m_pickedUp.transform.parent = transform.parent;
+        m_pickedUp.GetComponent<Collider2D>().enabled = true;
+        Rigidbody2D pickedUpRigidBody = m_pickedUp.GetComponent<Rigidbody2D>();
+        pickedUpRigidBody.bodyType = RigidbodyType2D.Dynamic;
+        pickedUpRigidBody.AddForce(m_throwForce);
+
+        m_pickedUp = null;
+        _mPickedUpPickupType = Types.PickupType.NONE;
     }
     
     public void OnInputMove(InputAction.CallbackContext context)
@@ -167,6 +201,10 @@ public class Player : MonoBehaviour, Notifiable
         CheckGround();
         CheckInput();
         SetAnimatorParameters();
+
+        if (m_pickedUp != null && _mPickedUpPickupType != Types.PickupType.AXE) {
+            m_pickedUp.transform.localPosition = new Vector3(0, 1f, 0);
+        }
     }
 
     private void FixedUpdate()
@@ -271,7 +309,6 @@ public class Player : MonoBehaviour, Notifiable
         Interactable interactable = other.GetComponent<Interactable>();
         if (interactable != null && m_interactables.Contains(interactable)) {
             m_interactables.Remove(interactable);
-            Debug.Log("Added damageable");
         }
     }
 }

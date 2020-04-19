@@ -2,35 +2,23 @@
 
 public class Pickup : MonoBehaviour, Interactable
 {
-    // STATIC
-    // -------------------------------------------------------------------------
-
-    public enum Type
-    {
-        AXE
-    }
-    
     // PROPERTIES
     // -------------------------------------------------------------------------
 
-    [SerializeField] private Type m_type;
+    [SerializeField] private Types.PickupType m_pickupType;
     [SerializeField] private GameObject m_proximityText;
 
     // ACCESSORS
     // -------------------------------------------------------------------------
 
-    public Type type => m_type;
+    public Types.PickupType pickupType => m_pickupType;
     
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
     
     public void Interact(Player player)
     {
-        if (!player.Pickup(m_type)) {
-            return;
-        }
-        
-        Destroy(transform.parent.gameObject);
+        player.Pickup(m_pickupType, transform.parent.gameObject);
     }
     
     // PRIVATE METHODS
