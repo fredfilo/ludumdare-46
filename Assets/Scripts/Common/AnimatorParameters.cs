@@ -9,4 +9,5 @@ public class AnimatorParameters
     public static readonly int IsShowingOff = Animator.StringToHash("is_showing_off");
     public static readonly int InputX = Animator.StringToHash("input_x");
     public static readonly int VelocityY = Animator.StringToHash("velocity_y");
+    public static readonly int State = Animator.StringToHash("state");
 }
