@@ -48,7 +48,7 @@ public class Player : MonoBehaviour, Notifiable
     private readonly List<Interactable> m_interactables = new List<Interactable>();
 
     private GameObject m_pickedUp;
-    private Types.PickupType _mPickedUpPickupType = Types.PickupType.NONE;
+    private Types.PickupType m_pickedUpType = Types.PickupType.NONE;
     
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
@@ -59,7 +59,7 @@ public class Player : MonoBehaviour, Notifiable
             return false;
         }
 
-        _mPickedUpPickupType = pickupPickupType;
+        m_pickedUpType = pickupPickupType;
         
         switch (pickupPickupType) {
             case Types.PickupType.WOOD:
@@ -82,6 +82,24 @@ public class Player : MonoBehaviour, Notifiable
     public void OnCannotWalk()
     {
         m_isDrowning = true;
+
+        if (m_pickedUp == null || m_pickedUpType == Types.PickupType.AXE) {
+            return;
+        }
+
+        Vector3 throwForce = m_throwForce;
+        if (!m_isFacingRight) {
+            throwForce.x *= -1f;
+        }
+        
+        m_pickedUp.transform.parent = transform.parent;
+        m_pickedUp.GetComponent<Collider2D>().enabled = true;
+        Rigidbody2D pickedUpRigidBody = m_pickedUp.GetComponent<Rigidbody2D>();
+        pickedUpRigidBody.bodyType = RigidbodyType2D.Dynamic;
+        pickedUpRigidBody.AddForce(throwForce);
+
+        m_pickedUp = null;
+        m_pickedUpType = Types.PickupType.NONE;
     }
 
     public void OnDrownFinished()
@@ -107,7 +125,7 @@ public class Player : MonoBehaviour, Notifiable
 
     public void OnThrowAttack()
     {
-        if (m_pickedUp == null || _mPickedUpPickupType == Types.PickupType.AXE) {
+        if (m_pickedUp == null || m_pickedUpType == Types.PickupType.AXE) {
             m_weapon.Attack();
             return;
         }
@@ -130,7 +148,7 @@ public class Player : MonoBehaviour, Notifiable
         pickedUpRigidBody.AddForce(throwForce);
 
         m_pickedUp = null;
-        _mPickedUpPickupType = Types.PickupType.NONE;
+        m_pickedUpType = Types.PickupType.NONE;
     }
     
     public void OnInputMove(InputAction.CallbackContext context)
@@ -227,7 +245,7 @@ public class Player : MonoBehaviour, Notifiable
         CheckInput();
         SetAnimatorParameters();
 
-        if (m_pickedUp != null && _mPickedUpPickupType != Types.PickupType.AXE) {
+        if (m_pickedUp != null && m_pickedUpType != Types.PickupType.AXE) {
             m_pickedUp.transform.localPosition = new Vector3(0, 1f, 0);
         }
     }
