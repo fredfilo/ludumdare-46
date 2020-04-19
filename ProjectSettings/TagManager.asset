@@ -8,6 +8,7 @@ TagManager:
   - Ground
   - Water
   - Wood
+  - Monkey
   layers:
   - Default
   - TransparentFX
@@ -26,7 +27,7 @@ TagManager:
   - Trees
   - Wood
   - Fire
-  - 
+  - Monkeys
   - 
   - 
   - 
@@ -42,6 +43,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 1671660925
+    locked: 0
   - name: Tree
     uniqueID: 1578461999
     locked: 0

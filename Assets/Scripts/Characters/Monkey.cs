@@ -1,17 +1,18 @@
 ﻿using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class Monkey : MonoBehaviour
 {
     // STATIC
     // -------------------------------------------------------------------------
 
-    private static int STATE_IDLE = 0; 
-    private static int STATE_RUN = 1; 
-    private static int STATE_HAPPY = 2; 
-    private static int STATE_JUMP = 3; 
-    private static int STATE_FALL = 4; 
-    private static int STATE_PEE = 5; 
-    private static int STATE_DIVE = 6;
+    private const int STATE_IDLE = 0; 
+    private const int STATE_RUN = 1; 
+    private const int STATE_HAPPY = 2; 
+    private const int STATE_JUMP = 3; 
+    private const int STATE_FALL = 4; 
+    private const int STATE_PEE = 5; 
+    private const int STATE_DIVE = 6;
     
     // PROPERTIES
     // -------------------------------------------------------------------------
@@ -43,6 +44,10 @@ public class Monkey : MonoBehaviour
     [SerializeField] private Transform m_fireTarget;
     [SerializeField] private Transform m_waterTarget;
     private Transform m_currentTarget;
+
+    private int m_currentState;
+    private float m_currentStateStartedAt;
+    private float m_currentStateExpiresAt;
     
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
@@ -121,13 +126,9 @@ public class Monkey : MonoBehaviour
         }
 
         // Jump
-        if (!m_isJumping && m_jumpHold && (m_isGrounded || (Time.time - m_wasGroundedAt) <= m_jumpCoyoteDuration)) {
+        if (!m_isJumping && m_jumpHold && m_isGrounded) {
+            m_jumpHold = false;
             m_isJumping = true;
-            m_jumpIterations = 0;
-        }
-
-        if (m_isJumping && !m_jumpHold) {
-            m_isJumping = false;
             m_jumpIterations = 0;
         }
     }
@@ -135,5 +136,23 @@ public class Monkey : MonoBehaviour
     private void SetAnimatorParameters()
     {
         m_animator.SetInteger(AnimatorParameters.State, STATE_IDLE);
+    }
+
+    private float GetStateDuration(int state)
+    {
+        switch (state) {
+            case STATE_IDLE:
+                return 3f;
+            case STATE_RUN:
+                return 5f;
+            case STATE_HAPPY:
+                return 1f;
+            case STATE_PEE:
+                return 2.5f;
+            case STATE_DIVE:
+                return 3f;
+            default:
+                return 0;
+        }
     }
 }

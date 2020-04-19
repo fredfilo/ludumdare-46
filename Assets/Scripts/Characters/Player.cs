@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Tilemaps;
 
 public class Player : MonoBehaviour, Notifiable
 {
@@ -26,6 +27,7 @@ public class Player : MonoBehaviour, Notifiable
     private bool m_isGrounded;
     private float m_wasGroundedAt;
     private Vector3 m_wasGroundedAtPosition;
+    [SerializeField] private Tilemap m_groundTilemap;
 
     [SerializeField] private float m_jumpForce = 3f;
     [SerializeField] private int m_jumpMaxIterations = 4;
@@ -290,7 +292,9 @@ public class Player : MonoBehaviour, Notifiable
         if (hit.collider) {
             m_isGrounded = true;
             m_wasGroundedAt = Time.time;
-            m_wasGroundedAtPosition = transform.position;
+            if (hit.collider.CompareTag("Ground")) {
+                m_wasGroundedAtPosition = transform.position;
+            }
             return;
         }
 
@@ -299,7 +303,9 @@ public class Player : MonoBehaviour, Notifiable
         if (hit.collider) {
             m_isGrounded = true;
             m_wasGroundedAt = Time.time;
-            m_wasGroundedAtPosition = transform.position;
+            if (hit.collider.CompareTag("Ground")) {
+                m_wasGroundedAtPosition = transform.position;
+            }
         }
     }
 
