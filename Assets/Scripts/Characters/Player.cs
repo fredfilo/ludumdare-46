@@ -38,6 +38,9 @@ public class Player : MonoBehaviour, Notifiable
     private bool m_isControllable = true;
     private bool m_isDrowning;
     private bool m_isThrowing;
+    private bool m_isShowingOff;
+    private bool m_shouldShowOff;
+    [SerializeField] private float m_chanceOfShowOffAfterThrow = 0.1f;
     
     [SerializeField] private PlayerWeapon m_weapon;
     [SerializeField] private Vector3 m_throwForce = new Vector3(300f, 300f, 0);
@@ -63,6 +66,7 @@ public class Player : MonoBehaviour, Notifiable
                 m_pickedUp = pickupObject;
                 m_pickedUp.transform.parent = transform;
                 m_pickedUp.transform.localPosition = new Vector3(0, 1f, 0);
+                m_pickedUp.transform.rotation = Quaternion.identity;
                 m_pickedUp.GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
                 m_pickedUp.GetComponent<Collider2D>().enabled = false;
                 break;
@@ -89,6 +93,16 @@ public class Player : MonoBehaviour, Notifiable
     public void OnThrowFinished()
     {
         m_isThrowing = false;
+
+        if (m_shouldShowOff) {
+            m_shouldShowOff = false;
+            m_isShowingOff = true;
+        }
+    }
+
+    public void OnShowOffFinished()
+    {
+        m_isShowingOff = false;
     }
 
     public void OnThrowAttack()
@@ -97,12 +111,23 @@ public class Player : MonoBehaviour, Notifiable
             m_weapon.Attack();
             return;
         }
+
+        Vector3 throwForce = m_throwForce; 
+        
+        if (Random.value < m_chanceOfShowOffAfterThrow) {
+            m_shouldShowOff = true;
+            throwForce = Vector2.up * m_throwForce.magnitude;
+        }
+
+        if (!m_isFacingRight) {
+            throwForce.x *= -1f;
+        }
         
         m_pickedUp.transform.parent = transform.parent;
         m_pickedUp.GetComponent<Collider2D>().enabled = true;
         Rigidbody2D pickedUpRigidBody = m_pickedUp.GetComponent<Rigidbody2D>();
         pickedUpRigidBody.bodyType = RigidbodyType2D.Dynamic;
-        pickedUpRigidBody.AddForce(m_throwForce);
+        pickedUpRigidBody.AddForce(throwForce);
 
         m_pickedUp = null;
         _mPickedUpPickupType = Types.PickupType.NONE;
@@ -292,6 +317,7 @@ public class Player : MonoBehaviour, Notifiable
         m_animator.SetBool(AnimatorParameters.IsRunning, m_inputAbsolute.x >= MIN_INPUT_FOR_RUN);
         m_animator.SetBool(AnimatorParameters.IsDrowning, m_isDrowning);
         m_animator.SetBool(AnimatorParameters.IsThrowing, m_isThrowing);
+        m_animator.SetBool(AnimatorParameters.IsShowingOff, m_isShowingOff);
         m_animator.SetFloat(AnimatorParameters.InputX, m_input.x);
         m_animator.SetFloat(AnimatorParameters.VelocityY, m_rigidBody.velocity.y);
     }

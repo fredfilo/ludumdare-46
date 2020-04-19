@@ -11350,6 +11350,7 @@ MonoBehaviour:
   m_jumpMaxIterations: 4
   m_jumpCoyoteDuration: 0.1
   m_maxFallVelocity: 14
+  m_chanceOfShowOffAfterThrow: 0.2
   m_weapon: {fileID: 1903502535}
   m_throwForce: {x: 350, y: 300, z: 0}
 --- !u!1 &1788204097
