@@ -290,7 +290,7 @@ public class Player : MonoBehaviour, Notifiable
         // Reset
         m_velocity.x = 0;
 
-        if (!m_isControllable) {
+        if (!m_isControllable || m_isShowingOff) {
             return;
         }
         
