@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c0df06067b8245beab2eead2146250c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_hitGroundAnimationPrefab: {fileID: 5274791267124213569, guid: bc857a4ecb82341b0b7b6c85c8db7a7a,
+    type: 3}
 --- !u!212 &1527383768860915076
 SpriteRenderer:
   m_ObjectHideFlags: 0

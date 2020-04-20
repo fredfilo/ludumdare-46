@@ -1,7 +1,8 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Monkey : MonoBehaviour
+public class Monkey : MonoBehaviour, Notifiable
 {
     // STATIC
     // -------------------------------------------------------------------------
@@ -30,24 +31,61 @@ public class Monkey : MonoBehaviour
     [SerializeField] private LayerMask m_groundLayers;
     private float m_checkGroundDistance = 0.1f;
     private readonly Vector2 m_checkGroundDirection = Vector2.down;
-    private bool m_isGrounded;
+    [SerializeField] private bool m_isGrounded;
     
     [SerializeField] private float m_jumpForce = 3f;
     [SerializeField] private int m_jumpMaxIterations = 4;
     [SerializeField] private float m_maxFallVelocity = 12f;
     private int m_jumpIterations;
-    private bool m_isJumping;
-    private bool m_jumpHold;
-
-    private bool m_isDiving;
+    [SerializeField] private bool m_isJumping;
+    [SerializeField] private bool m_jumpHold;
+    [SerializeField] private bool m_isDiving;
 
     [SerializeField] private Transform m_fireTarget;
     [SerializeField] private Transform m_waterTarget;
     private Transform m_currentTarget;
+    [SerializeField] private Types.PathTo m_currentPathTo;
 
-    private int m_currentState;
-    private float m_currentStateStartedAt;
-    private float m_currentStateExpiresAt;
+    [SerializeField] private int m_currentState;
+    [SerializeField] private float m_currentStateStartedAt;
+    [SerializeField] private float m_currentStateExpiresAt;
+
+    [SerializeField] private bool m_isFull;
+
+    private float m_wasIdleAt;
+    [SerializeField] private float m_maxDurationWithoutIdle = 5f;
+
+    [SerializeField] private int m_combustiblePerPee = 1;
+
+    private bool m_isControllable = true;
+    
+    // ACCESSORS
+    // -------------------------------------------------------------------------
+
+    public Types.PathTo currentPathTo
+    {
+        get => m_currentPathTo;
+        set => m_currentPathTo = value;
+    }
+
+    public bool isFull
+    {
+        get => m_isFull;
+        set => m_isFull = value;
+    }
+
+    public Transform spriteContainer => m_spritesContainer;
+
+    // PUBLIC METHODS
+    // -------------------------------------------------------------------------
+    
+    public void ChangeOrientation()
+    {
+        m_isFacingRight = !m_isFacingRight;
+        Vector3 scale = m_spritesContainer.localScale;
+        scale.x = Mathf.Abs(scale.x) * (m_isFacingRight ? 1f : -1f);
+        m_spritesContainer.localScale = scale;
+    }
     
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
@@ -56,14 +94,29 @@ public class Monkey : MonoBehaviour
     {
         m_rigidBody = GetComponent<Rigidbody2D>();
         m_animator = GetComponent<Animator>();
+        
+        DecideState();
+        
+        GameController.instance.notifier.Subscribe(Notification.Type.WIN, this);
+        GameController.instance.notifier.Subscribe(Notification.Type.LOSE, this);
     }
-    
+
+    private void OnDestroy()
+    {
+        GameController.instance.notifier.Unsubscribe(Notification.Type.WIN, this);
+        GameController.instance.notifier.Unsubscribe(Notification.Type.LOSE, this);
+    }
+
     private void Update()
     {
         CheckOrientation();
         CheckGround();
         CheckInput();
         SetAnimatorParameters();
+
+        if (Time.time > m_currentStateExpiresAt) {
+            DecideState();
+        }
     }
     
     private void FixedUpdate()
@@ -90,10 +143,7 @@ public class Monkey : MonoBehaviour
     private void CheckOrientation()
     {
         if (m_input.x > 0 && !m_isFacingRight || m_input.x < 0 && m_isFacingRight) {
-            m_isFacingRight = !m_isFacingRight;
-            Vector3 scale = m_spritesContainer.localScale;
-            scale.x = Mathf.Abs(scale.x) * (m_isFacingRight ? 1f : -1f);
-            m_spritesContainer.localScale = scale;
+            ChangeOrientation();
         }
     }
 
@@ -117,8 +167,11 @@ public class Monkey : MonoBehaviour
 
     private void CheckInput()
     {
-        // Reset
-        m_velocity.x = 0;
+        if (!m_isControllable) {
+            m_input.x = 0;
+            m_velocity.x = 0;
+            return;
+        }
         
         // Movement
         if (!m_isDiving) {
@@ -135,7 +188,17 @@ public class Monkey : MonoBehaviour
     
     private void SetAnimatorParameters()
     {
-        m_animator.SetInteger(AnimatorParameters.State, STATE_IDLE);
+        if (m_rigidBody.velocity.y < 0) {
+            m_animator.SetInteger(AnimatorParameters.State, STATE_FALL);
+            return;
+        }
+        
+        if (m_rigidBody.velocity.y > 0) {
+            m_animator.SetInteger(AnimatorParameters.State, STATE_JUMP);
+            return;
+        }
+        
+        m_animator.SetInteger(AnimatorParameters.State, m_currentState);
     }
 
     private float GetStateDuration(int state)
@@ -152,7 +215,84 @@ public class Monkey : MonoBehaviour
             case STATE_DIVE:
                 return 3f;
             default:
-                return 0;
+                return 0.3f;
+        }
+    }
+
+    private void OnTriggerEnter2D(Collider2D other)
+    {
+        if (m_currentPathTo == Types.PathTo.FIRE && other.CompareTag("FireForMonkey")) {
+            GameController.instance.fire.IncreaseCombustible(-m_combustiblePerPee);
+            SetState(STATE_PEE);
+            m_isFull = false;
+            return;
+        }
+        
+        if (m_currentPathTo == Types.PathTo.WATER && other.CompareTag("WaterForMonkey")) {
+            SetState(STATE_DIVE);
+            ChangeOrientation();
+            m_isFull = true;
+            return;
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D other)
+    {
+        MonkeyJumper jumper = other.GetComponent<MonkeyJumper>();        
+        if (jumper && jumper.pathTo == m_currentPathTo) {
+            SetState(STATE_JUMP);
+            m_jumpHold = true;
+        }
+    }
+
+    private void SetState(int state)
+    {
+        //Debug.Log("SetState: " + state);
+        m_currentState = state;
+
+        switch (m_currentState) {
+            case STATE_RUN:
+            case STATE_JUMP:
+            case STATE_FALL:
+                m_input.x = m_isFacingRight ? 1f : -1f;
+                break;
+            case STATE_IDLE:
+                m_wasIdleAt = Time.time;
+                break;
+            default:
+                m_input.x = 0;
+                break;
+        }
+
+        m_currentStateExpiresAt = Time.time + GetStateDuration(m_currentState);
+    }
+
+    private void DecideState()
+    {
+        m_currentPathTo = m_isFull ? Types.PathTo.FIRE : Types.PathTo.WATER;
+
+        switch (m_currentState) {
+            case STATE_PEE:
+                SetState(STATE_HAPPY);
+                return;
+            case STATE_HAPPY:
+                SetState(STATE_RUN);
+                return;
+            case STATE_RUN:
+                if (m_isGrounded && Time.time - m_wasIdleAt > m_maxDurationWithoutIdle) {
+                    SetState(STATE_IDLE);
+                    return;
+                }
+                break;
+        }
+
+        SetState(STATE_RUN);
+    }
+
+    public void OnNotification(Notification notification, Notifier notifier)
+    {
+        if (notification.type == Notification.Type.WIN || notification.type == Notification.Type.LOSE) {
+            m_isControllable = false;
         }
     }
 }

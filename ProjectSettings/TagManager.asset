@@ -9,6 +9,9 @@ TagManager:
   - Water
   - Wood
   - Monkey
+  - MonkeyJumper
+  - WaterForMonkey
+  - FireForMonkey
   layers:
   - Default
   - TransparentFX
@@ -28,7 +31,7 @@ TagManager:
   - Wood
   - Fire
   - Monkeys
-  - 
+  - MonkyJumper
   - 
   - 
   - 

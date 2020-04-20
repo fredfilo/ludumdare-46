@@ -13,6 +13,15 @@ public class Fire : MonoBehaviour
 
     private float m_consumedAt;
     
+    // PUBLIC METHODS
+    // -------------------------------------------------------------------------
+    
+    public void IncreaseCombustible(int value)
+    {
+        m_combustible = Mathf.Clamp(m_combustible + value, 0, m_maxCombustible);
+        UpdateParticles();
+    }
+    
     // PRIVATE METHODS
     // -------------------------------------------------------------------------
     
@@ -24,12 +33,6 @@ public class Fire : MonoBehaviour
         }
     }
 
-    private void IncreaseCombustible(int value)
-    {
-        m_combustible = Mathf.Clamp(m_combustible + value, 0, m_maxCombustible);
-        UpdateParticles();
-    }
-    
     private void UpdateParticles()
     {
         if (!m_particles) {
@@ -52,6 +55,10 @@ public class Fire : MonoBehaviour
             main.startLifetime = 4f;
         } else {
             main.startLifetime = 5f;
+        }
+
+        if (m_combustible <= 0) {
+            GameController.instance.notifier.Notify(new Lose());
         }
     }
 

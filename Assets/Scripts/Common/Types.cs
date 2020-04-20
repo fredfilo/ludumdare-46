@@ -9,4 +9,24 @@
         AXE,
         WOOD
     }
+
+    public enum PathTo
+    {
+        FIRE,
+        WATER
+    }
+
+    public enum MovementType
+    {
+        RUN,
+        JUMP,
+        FALL
+    }
+
+    public enum PathNodeType
+    {
+        FIRE,
+        WATER,
+        NODE
+    }
 }

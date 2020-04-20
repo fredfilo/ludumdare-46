@@ -13,17 +13,20 @@ public class MessagesPanel : MonoBehaviour, Notifiable
     [SerializeField] private TextMeshProUGUI m_messageText;
 
     private List<String> m_messages;
+    private Messages.Type m_messagesType;
     
     private int m_currentMessageIndex = -1;
     
     // PUBLIC METHODS
     // -------------------------------------------------------------------------
 
-    public void ReadMessages(String title, List<String> messages)
+    public void ReadMessages(Messages.Type messagesType, String title, List<String> messages)
     {
         if (messages.Count < 1) {
             return;
         }
+
+        m_messagesType = messagesType;
         
         GameController.instance.notifier.Notify(new UIInteractionStarted());
         
@@ -74,6 +77,7 @@ public class MessagesPanel : MonoBehaviour, Notifiable
         if (m_currentMessageIndex >= m_messages.Count) {
             m_messages = null;
             gameObject.SetActive(false);
+            GameController.instance.notifier.Notify(new FinishedReadingMessages(m_messagesType));
             GameController.instance.notifier.Notify(new UIInteractionEnded());
             return;
         }

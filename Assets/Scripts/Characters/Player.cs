@@ -129,6 +129,7 @@ public class Player : MonoBehaviour, Notifiable
     {
         if (m_pickedUp == null || m_pickedUpType == Types.PickupType.AXE) {
             m_weapon.Attack();
+            GameController.instance.PlayAttackTree();
             return;
         }
 
@@ -137,6 +138,7 @@ public class Player : MonoBehaviour, Notifiable
         if (Random.value < m_chanceOfShowOffAfterThrow) {
             m_shouldShowOff = true;
             throwForce = Vector2.up * m_throwForce.magnitude;
+            GameController.instance.PlayShowOff();
         }
 
         if (!m_isFacingRight) {
@@ -151,6 +153,8 @@ public class Player : MonoBehaviour, Notifiable
 
         m_pickedUp = null;
         m_pickedUpType = Types.PickupType.NONE;
+        
+        GameController.instance.PlayThrow();
     }
     
     public void OnInputMove(InputAction.CallbackContext context)
@@ -219,7 +223,22 @@ public class Player : MonoBehaviour, Notifiable
             case Notification.Type.UI_INTERACTION_ENDED:
                 m_isControllable = true;
                 break;
+            case Notification.Type.WIN:
+                Debug.Log("WIN");
+                // m_isControllable = false;
+                // m_isShowingOff = true;
+                // Invoke(nameof(DontShowOff), 1f);
+                break;
+            case Notification.Type.LOSE:
+                Debug.Log("LOSE");
+                // m_isControllable = false;
+                break;
         }
+    }
+
+    private void DontShowOff()
+    {
+        m_isShowingOff = false;
     }
 
     // PRIVATE METHODS
@@ -232,12 +251,15 @@ public class Player : MonoBehaviour, Notifiable
         
         GameController.instance.notifier.Subscribe(Notification.Type.UI_INTERACTION_STARTED, this);
         GameController.instance.notifier.Subscribe(Notification.Type.UI_INTERACTION_ENDED, this);
+        GameController.instance.notifier.Subscribe(Notification.Type.WIN, this);
+        GameController.instance.notifier.Subscribe(Notification.Type.LOSE, this);
     }
 
     private void OnDestroy()
     {
         GameController.instance.notifier.Unsubscribe(Notification.Type.UI_INTERACTION_STARTED, this);
-        GameController.instance.notifier.Unsubscribe(Notification.Type.UI_INTERACTION_ENDED, this);
+        GameController.instance.notifier.Unsubscribe(Notification.Type.WIN, this);
+        GameController.instance.notifier.Unsubscribe(Notification.Type.LOSE, this);
     }
 
     private void Update()
@@ -325,6 +347,7 @@ public class Player : MonoBehaviour, Notifiable
 
         // Jump
         if (!m_isJumping && m_jumpHold && (m_isGrounded || (Time.time - m_wasGroundedAt) <= m_jumpCoyoteDuration)) {
+            GameController.instance.PlayJump();
             m_isJumping = true;
             m_jumpIterations = 0;
         }
