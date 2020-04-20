@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - CannotWalk
+  - Ground
+  - Water
+  - Wood
+  - Monkey
+  - MonkeyJumper
+  - WaterForMonkey
+  - FireForMonkey
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Ground
+  - Player
+  - Pickup
+  - InteractableArea
+  - HitArea
+  - PlayerWeapon
+  - Trees
+  - Wood
+  - Fire
+  - Monkeys
+  - MonkyJumper
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Background
+    uniqueID: 1671660925
+    locked: 0
+  - name: Tree
+    uniqueID: 1578461999
+    locked: 0
+  - name: Fire
+    uniqueID: 918346101
+    locked: 0
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Player
+    uniqueID: 1572898147
+    locked: 0
+  - name: Grass
+    uniqueID: 454461425
+    locked: 0
+  - name: Water
+    uniqueID: 3445782431
+    locked: 0
